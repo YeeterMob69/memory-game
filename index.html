@@ -20,47 +20,83 @@
 
 <body onload="init()">
     <div id="cards">
-
+        <!-- tu będą karty wygenerowane przed kod JS-->
     </div>
     <script>
-        let cards = Array();
-        let selecion = {};
+        let cards = Array();//globalna tablica kart
+        let selecion = {};//obiekt przechowujący wybór
 
-        function init() {
-            let cardArray = Array();
-            for (let i = 0; i < 5; i++) {
-                cardArray.push("card" + i + ".jpg");
-                cardArray.push("card" + i + ".jpg");
+        function init() { //nowa gra
+            let cardArray = Array(); //tworzymy pustą tabele na karty
+            for (let i = 0; i < 5; i++) { // powatarzamy dla każdej z 5 kart
+                cardArray.push("card" + i + ".jpg"); // dodajemy ja do tablicy
+                cardArray.push("card" + i + ".jpg"); // i drugi raz
+            } 
+            //tablica [0,0,1,1,2,2,3,3,4,4]
+            let randomArray = Array() //nowa tablica na wylosowane karty
+            while (cardArray.length > 0) { //póki zosatały karty nielosowane
+                let r = Math.floor(Math.random() * cardArray.length); // wylosuj index
+                let randomCard = cardArray.splice(r, 1)[0]; // wyciągnij kartę z nielosowanych
+                randomCard = { 'url': randomCard, 'isVisible': false } // zrób z niej obiekt (dodaj widzoczność)
+                randomArray.push(randomCard); // włóż do potasowanej karty
             }
-            let randomArray = Array()
-            while (cardArray.length > 0) {
-                let r = Math.floor(Math.random() * cardArray.length);
-                let randomCard = cardArray.splice(r, 1)[0];
-                randomCard = { 'url': randomCard, 'isVisible': false }
-                randomArray.push(randomCard);
+            cards = randomArray; // zapisz potasowane jako globalna tablice z kartami
+            displayCards(); // pokaż karty
+        }
+        function checkIfWin() {
+            let cardsHidden = 0; // zaczynamy bez krytych kart
+            for(let i = 0; i < cards.length; i++) { // sprawddzamy kolejno karty
+                if (cards[i].isVisible == false) //jeśli jest zakryta
+                    cardsHidden++; //dodaj 1 do licznika zakrytych
             }
-            cards = randomArray;
-            displayCards();
+            if (cardsHidden == 0) //jeśli zero zakrytych wygrana gra
+                alert("Gratulacje - wygrałeś!")
+
         }
 
         function displayCards() {
-            let cardDiv = document.getElementById("cards");
-            cardDiv.innerHTML = "";
-            for (let i = 0; i < 10; i++) {
-                if (cards[i].isVisible) {
-                    cardDiv.innerHTML += "<img onClick=\"flipCard("+i+")\" src=\"" + cards[i].url + "\">";
+            let cardDiv = document.getElementById("cards"); // popbierz div w którym mają zostać wylosowane karty
+            cardDiv.innerHTML = ""; //wyczyść go
+            for (let i = 0; i < 10; i++) { //przejdź przez talie kart
+                if (cards[i].isVisible) { //jeżeli karta jest widzoczna
+                    cardDiv.innerHTML += "<img onClick=\"flipCard(" + i + ")\" src=\"" + cards[i].url + "\">"; // wyświetl obrazek z jej url
                 } else {
-                    cardDiv.innerHTML += "<img onClick=\"flipCard("+i+")\" src=\"back.jpg\">";
+                    cardDiv.innerHTML += "<img onClick=\"flipCard(" + i + ")\" src=\"back.jpg\">";  // jeśli nie odwróć je spowrotem
 
                 }
             }
         }
         function flipCard(i) {
-            cards[i].isVisible = !cards[i].isVisible;
+            if (selecion.first == null) { //jeśli nie ma pierwszej karty
+                cards[i].isVisible = !cards[i].isVisible; // zmień widoczność klikniętej karty
+                selecion.first = i; //zapisz wybór
+            } else {
+                if (selecion.second in window) { //jeśli nie wybraliśmy drugiej karty
+                    cards[i].isVisible = !cards[i].isVisible;//odwróć kartę
+                    selecion.second = i; //zapisz wybór
+                    // console.log(cards[selecion.first].url+" "+cards[selecion.second].url);
+                    if (cards[selecion.first].url == cards[selecion.second].url) {
+                        selecion = {}; // wyzcyśc zapamietane karty
+                    } else {
+                        setTimeout(hide, 1000); //uruchom hide z opóźnieniem
+                    }
+                }
+            }
+            //pokaż karty (po zmianie widioczności)
             displayCards();
+            //sprawdź czy koniec gry
+            checkIfWin();
+        }      
+        function hide() {
+            //uruchamia się tylko jeśli klikniemy dwie karty
+            // console.log("uruchamiam hide");
+            cards[selecion.first].isVisible = false; //ukryj pierszą wybraną kartę
+            cards[selecion.second].isVisible = false; //ukryj drugą
+            selecion = {}; //wyczyśc zapamiętany wybór
+            displayCards(); //poakż karty
         }
 
-        
+
 
     </script>
 </body>
